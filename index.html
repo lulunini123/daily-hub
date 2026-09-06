@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="生活小助手">
+  <title>生活小助手 · Daily Hub</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f2ea'/%3E%3Cpath d='M8 24V12l8-6 8 6v12' fill='none' stroke='%23e14b2f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="icons/splash-640x1136.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="icons/splash-750x1334.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="icons/splash-828x1792.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="icons/splash-1125x2436.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="icons/splash-1170x2532.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="icons/splash-1242x2688.png">
+  <meta name="theme-color" content="#b07a5e">
+</head>
+<body>
+  <div class="weather-layers" id="weatherLayers" aria-hidden="true">
+    <div class="wl wl-sun" id="wlSun"></div>
+    <div class="wl wl-clouds" id="wlClouds"></div>
+    <div class="wl wl-rain" id="wlRain"></div>
+    <div class="wl wl-rain wl-heavy" id="wlHeavy"></div>
+    <div class="wl wl-fog" id="wlFog"></div>
+    <div class="wl wl-snow" id="wlSnow"></div>
+    <div class="wl wl-thunder" id="wlThunder"></div>
+  </div>
+
+  <div class="mobile-nav-wrap" id="mobileNavWrap" hidden></div>
+
+  <nav class="m-tabbar" id="mTabbar" aria-label="移动端底部导航">
+    <button class="m-tab" data-module="overview" aria-label="总览">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>
+      <span>总览</span>
+    </button>
+    <button class="m-tab" data-module="timetable" aria-label="课程">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+      <span>课程</span>
+    </button>
+    <button class="m-tab" data-module="todo" aria-label="待办">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+      <span>待办</span>
+      <b class="m-badge" data-badge="todo"></b>
+    </button>
+    <button class="m-tab" data-module="homework" aria-label="作业">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M6 11l6 6 6-6"></path><path d="M5 21h14"></path></svg>
+      <span>作业</span>
+      <b class="m-badge" data-badge="homework"></b>
+    </button>
+    <button class="m-tab" id="mMoreTab" aria-label="更多">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg>
+      <span>更多</span>
+    </button>
+  </nav>
+
+  <div class="m-more" id="mMore" aria-hidden="true">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="m-more-head">
+      <button class="m-user" id="mUserBtn" title="用户">
+        <span class="m-avatar" id="mAvatar">同</span>
+        <span class="m-user-text" id="mUserName">同学</span>
+      </button>
+      <button class="m-mode" id="mModeSwitch" aria-label="日夜模式" title="日夜模式">
+        <svg class="m-mode-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M17.66 17.66l1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M6.34 17.66l-1.41 1.41"></path><path d="M19.07 4.93l-1.41 1.41"></path></svg>
+        <svg class="m-mode-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+    </div>
+    <nav class="m-more-nav">
+      <button class="m-item" data-module="schedule" aria-label="日程表"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><span>日程表</span></button>
+      <button class="m-item" data-module="memo" aria-label="备忘录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg><span>备忘录</span></button>
+      <button class="m-item" data-module="pomodoro" aria-label="番茄时钟"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2.5"></path><path d="M9 2h6"></path></svg><span>番茄时钟</span></button>
+      <button class="m-item" data-module="settings" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>设置</span></button>
+    </nav>
+    <div class="m-more-tools">
+      <button class="m-tool" id="mExportBtn" aria-label="导出数据" title="导出数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg><span>导出</span></button>
+      <button class="m-tool" id="mImportBtn" aria-label="导入数据" title="导入数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5"></path><path d="M12 3v12"></path></svg><span>导入</span></button>
+    </div>
+  </div>
+  <div class="m-mask" id="mMask"></div>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">日</div>
+        <div>
+          <div class="brand-name">生活小助手</div>
+          <div class="brand-sub">Daily Hub</div>
+        </div>
+        <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开导航" aria-label="收起/展开导航">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item active" data-module="overview">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"></path>
+            <path d="M5 9.5V21h14V9.5"></path>
+          </svg>
+          总览
+        </button>
+        <button class="nav-item" data-module="timetable">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M3 9h18"></path>
+            <path d="M9 21V9"></path>
+          </svg>
+          课程表
+        </button>
+        <button class="nav-item" data-module="homework">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"></path>
+            <path d="M6 11l6 6 6-6"></path>
+            <path d="M5 21h14"></path>
+          </svg>
+          作业
+        </button>
+        <button class="nav-item" data-module="todo">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          待办事项
+        </button>
+        <button class="nav-item" data-module="schedule">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M16 2v4"></path>
+            <path d="M8 2v4"></path>
+            <path d="M3 10h18"></path>
+          </svg>
+          日程表
+        </button>
+        <button class="nav-item" data-module="memo">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <path d="M14 2v6h6"></path>
+            <path d="M16 13H8"></path>
+            <path d="M16 17H8"></path>
+          </svg>
+          备忘录
+        </button>
+        <button class="nav-item" data-module="pomodoro">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="13" r="8"></circle>
+            <path d="M12 9v4l2.5 2.5"></path>
+            <path d="M9 2h6"></path>
+          </svg>
+          番茄时钟
+        </button>
+        <button class="nav-item" data-module="settings">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          设置
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <button id="exportBtn" title="导出数据">导出</button>
+        <button id="importBtn" title="导入数据">导入</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="mobileBackBtn" class="mobile-back" aria-label="返回" hidden>&lsaquo;</button>
+        <div>
+          <h1 id="pageTitle">总览</h1>
+          <div class="date-line" id="dateLine"></div>
+        </div>
+        <div class="topbar-stats" id="topbarStats"></div>
+        <span class="offline-pill" id="offlinePill" hidden>离线</span>
+        <div class="topbar-actions" id="topbarActions">
+          <button type="button" id="topThemeBtn" class="icon-btn top-action" title="日夜模式" aria-label="日夜模式">
+            <svg class="top-theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M17.66 17.66l1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M6.34 17.66l-1.41 1.41"></path><path d="M19.07 4.93l-1.41 1.41"></path></svg>
+            <svg class="top-theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
+          <button type="button" id="topExportBtn" class="icon-btn top-action" title="导出数据" aria-label="导出数据">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+          </button>
+          <button type="button" id="topImportBtn" class="icon-btn top-action" title="导入数据" aria-label="导入数据">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5"></path><path d="M12 3v12"></path></svg>
+          </button>
+          <button type="button" id="topWeatherBtn" class="icon-btn top-action" title="获取天气" aria-label="获取天气">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-.4-8.98A6 6 0 1 0 6 16.5"></path><path d="M12 3v2"></path><path d="M4.9 5.9l1.4 1.4"></path><path d="M19.1 5.9l-1.4 1.4"></path></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="module active" id="module-overview">
+        <div class="pull-hint" id="pullHint" hidden>松开刷新</div>
+        <div class="ov-head">
+          <div>
+            <h2 class="ov-greeting" id="ovGreeting">你好，同学</h2>
+            <p class="ov-motto" id="ovMotto">山山难过山山过</p>
+          </div>
+          <div class="mood-box">
+            <span class="mood-label">心情</span>
+            <select id="moodSelect" class="mood-select"></select>
+          </div>
+        </div>
+        <div class="banner-error" id="bannerError" hidden></div>
+
+        <div class="weather-card glass">
+          <div class="weather-main">
+            <span class="weather-city" id="weatherCity">--</span>
+            <span class="weather-temp" id="weatherTemp">--</span>
+            <span class="weather-cond" id="weatherCond"></span>
+          </div>
+          <button id="weatherGetBtn" class="ghost-btn">获取天气</button>
+        </div>
+
+        <div class="ov-grid">
+          <div class="ov-course-col">
+            <div class="panel glass ov-course-panel">
+              <h3>今日课程 <span id="ovCoursesWeek"></span></h3>
+              <ul class="ov-list" id="ovCourses"></ul>
+            </div>
+            <div class="panel glass alert-panel" id="alertPanel">
+              <h3>智能提醒</h3>
+              <div id="alertList"></div>
+            </div>
+          </div>
+          <div class="ov-side">
+            <div class="panel glass ov-panel">
+              <h3>今日待办</h3>
+              <ul class="ov-list" id="ovTodos"></ul>
+            </div>
+            <div class="panel glass ov-panel">
+              <h3>备忘录</h3>
+              <ul class="ov-list ov-memo-list" id="ovMemos"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel glass ov-homework">
+          <h3>作业</h3>
+          <div class="hw-quick">
+            <input id="ovHwInput" placeholder="随手记作业">
+            <select id="ovHwCategory"></select>
+            <input type="file" id="ovHwFile" accept="image/*" multiple>
+            <button id="ovHwAdd" class="primary-btn">添加</button>
+          </div>
+          <ul class="ov-list" id="ovHwList"></ul>
+        </div>
+
+        <div class="cat-cluster">
+          <button class="cat-thumb" id="catSlot0" title="小猫"><img id="catImg0" alt=""></button>
+          <button class="cat-thumb" id="catSlot1" title="小猫"><img id="catImg1" alt=""></button>
+        </div>
+      </section>
+
+      <section class="module" id="module-pomodoro">
+        <div class="pomodoro-layout">
+          <div class="pomodoro-ring-wrap">
+            <div class="pomodoro-ring" id="pomodoroRing">
+              <div class="pomodoro-inner">
+                <div class="mode-label" id="pomodoroMode">专注</div>
+                <div class="time-display" id="pomodoroTime">25:00</div>
+                <div class="session-count" id="pomodoroCount"></div>
+              </div>
+            </div>
+            <div class="segmented" id="pomoModes">
+              <button data-mode="work" class="active">专注</button>
+              <button data-mode="break">短休</button>
+              <button data-mode="longBreak">长休</button>
+            </div>
+            <div class="pomodoro-controls">
+              <button id="pomodoroToggle" class="primary-btn">开始</button>
+              <button id="pomodoroReset" class="ghost-btn">重置</button>
+            </div>
+          </div>
+          <div class="panel pomodoro-settings">
+            <h3>时长设置</h3>
+            <label>专注（分钟）<input type="number" id="workMinutes" min="1" max="120"></label>
+            <label>短休（分钟）<input type="number" id="breakMinutes" min="1" max="60"></label>
+            <label>长休（分钟）<input type="number" id="longBreakMinutes" min="1" max="90"></label>
+            <label>长休间隔（个）<input type="number" id="sessionsBeforeLongBreak" min="2" max="12"></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="module" id="module-timetable">
+        <div class="tt-toolbar">
+          <div class="tt-week-info">
+            <button id="ttPrev" class="icon-btn" title="上一周">&lsaquo;</button>
+            <select id="ttWeekSelect" class="tt-week-select"></select>
+            <button id="ttNext" class="icon-btn" title="下一周">&rsaquo;</button>
+            <button id="ttToday" class="ghost-btn">本周</button>
+            <span class="tt-week-range" id="ttWeekRange"></span>
+          </div>
+          <label class="tt-semester">开学日期<input type="date" id="semesterStart"></label>
+        </div>
+        <div class="timetable-wrap">
+          <div class="timetable-grid" id="timetableGrid"></div>
+        </div>
+        <div class="tt-mobile" id="ttMobile"></div>
+      </section>
+
+      <section class="module" id="module-homework">
+        <button class="fab" id="hwFab" aria-label="新增作业" title="新增作业">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        </button>
+        <div class="sheet-backdrop" id="hwSheetMask"></div>
+        <div class="homework-layout">
+          <div class="panel hw-add-sheet" id="hwAddSheet">
+            <div class="sheet-handle" aria-hidden="true"></div>
+            <div class="sheet-head">
+              <b>添加作业</b>
+              <button type="button" class="sheet-close" id="hwSheetClose" aria-label="关闭">×</button>
+            </div>
+            <form class="hw-form" id="hwForm">
+              <select id="hwCategory"></select>
+              <input id="hwTitle" placeholder="作业内容" required>
+              <div class="row2">
+                <label>开始日期<input id="hwStart" type="date"></label>
+                <label>截止日期<input id="hwDue" type="date"></label>
+              </div>
+              <label class="hw-time-row">截止时间（可选）<input id="hwDueTime" type="time"></label>
+              <textarea id="hwNote" placeholder="备注"></textarea>
+              <input type="file" id="hwFile" accept="image/*" multiple>
+              <div class="hw-photos" id="hwPhotos"></div>
+              <button class="primary-btn">添加作业</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>作业清单</h3>
+            <div class="hw-groups" id="hwGroups"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="module" id="module-schedule">
+        <div class="schedule-layout">
+          <div class="panel calendar-panel">
+            <div class="calendar-head">
+              <button id="prevMonth" class="icon-btn" title="上个月">&lsaquo;</button>
+              <h3 id="calendarTitle"></h3>
+              <button id="nextMonth" class="icon-btn" title="下个月">&rsaquo;</button>
+              <button id="todayBtn" class="ghost-btn">今天</button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>周一</span><span>周二</span><span>周三</span><span>周四</span>
+              <span>周五</span><span>周六</span><span>周日</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </div>
+          <div class="panel day-panel" id="dayPanel">
+            <h3 id="dayTitle"></h3>
+            <form class="event-form" id="eventForm">
+              <div class="row1">
+                <input id="eventTitle" placeholder="安排内容" required>
+                <input id="eventTime" type="time">
+              </div>
+              <input id="eventNote" placeholder="备注">
+              <button class="primary-btn">添加安排</button>
+            </form>
+            <ul class="event-list" id="eventList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="module" id="module-todo">
+        <button class="fab" id="todoFab" aria-label="新增待办" title="新增待办">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        </button>
+        <div class="sheet-backdrop" id="todoSheetMask"></div>
+        <div class="sheet-panel" id="todoSheet">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div class="sheet-head">
+            <b>新增待办</b>
+            <button type="button" class="sheet-close" id="todoSheetClose" aria-label="关闭">×</button>
+          </div>
+          <form class="todo-form" id="todoForm">
+            <input id="todoInput" placeholder="要做什么？" required>
+            <select id="todoPriority">
+              <option value="mid">普通</option>
+              <option value="high">重要</option>
+              <option value="low">不急</option>
+            </select>
+            <input type="date" id="todoDue">
+            <input type="time" id="todoDueTime">
+            <button class="primary-btn">添加</button>
+          </form>
+        </div>
+        <div class="segmented todo-filters" id="todoFilters">
+          <button data-filter="all" class="active">全部</button>
+          <button data-filter="active">未完成</button>
+          <button data-filter="done">已完成</button>
+        </div>
+        <ul class="todo-list" id="todoList"></ul>
+      </section>
+
+      <section class="module" id="module-memo">
+        <div class="memo-layout">
+          <div class="panel memo-side">
+            <input id="memoSearch" placeholder="搜索备忘录">
+            <button id="newMemoBtn" class="primary-btn">新建</button>
+            <ul class="memo-list" id="memoList"></ul>
+          </div>
+          <div class="panel memo-editor">
+            <div class="memo-editor-head">
+              <button id="memoBackBtn" class="ghost-btn memo-back">‹ 返回</button>
+              <div class="memo-meta" id="memoMeta"></div>
+              <button id="memoDeleteBtn" class="danger-btn">删除</button>
+            </div>
+            <input id="memoTitle" placeholder="标题">
+            <textarea id="memoContent" placeholder="写点什么..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="module" id="module-settings">
+        <div class="settings-apply">
+          <button id="settingsApplyBtn" class="primary-btn">确认应用</button>
+        </div>
+        <div class="settings-layout">
+          <div class="panel settings-panel">
+            <h3>个人</h3>
+            <label>昵称<input type="text" id="setNickname"></label>
+            <label>座右铭<input type="text" id="setMotto"></label>
+            <div class="settings-actions">
+              <button type="button" id="setAvatarClear" class="ghost-btn">恢复默认头像</button>
+            </div>
+          </div>
+          <div class="panel settings-panel">
+            <h3>颜色主题</h3>
+            <label>界面模式<select id="setThemeMode">
+              <option value="day">日间</option>
+              <option value="night">夜间</option>
+            </select></label>
+            <div class="theme-swatches" id="themeSwatches"></div>
+            <div class="custom-colors">
+              <label>主色<input type="color" id="setAccent"></label>
+              <label>背景<input type="color" id="setBg"></label>
+              <label>面板<input type="color" id="setPanel"></label>
+              <label>文字<input type="color" id="setInk"></label>
+            </div>
+            <div class="bg-row">
+              <label>背景图片<input type="file" id="setBgFile" accept="image/*"></label>
+              <button id="setBgClear" class="ghost-btn">清除</button>
+            </div>
+            <div class="bg-preview" id="bgPreview"><span>未设置背景</span></div>
+            <label>面板透明度（设置背景图后生效）<input type="range" id="setPanelOpacity" min="20" max="100" step="5"><span class="range-val" id="setPanelOpacityVal">80%</span></label>
+          </div>
+          <div class="panel settings-panel">
+            <h3>文字大小</h3>
+            <label>界面字体<input type="range" id="setFontScale" min="80" max="130" step="5"><span class="range-val" id="setFontScaleVal">100%</span></label>
+            <label>课程表字体<input type="range" id="setTimetableFont" min="80" max="130" step="5"><span class="range-val" id="setTimetableFontVal">100%</span></label>
+          </div>
+          <div class="panel settings-panel">
+            <h3>小猫的话</h3>
+            <div class="dynamic-list" id="catMsgList"></div>
+            <div class="settings-actions">
+              <button id="catMsgAdd" class="ghost-btn">添加一条</button>
+              <button id="catMsgReset" class="ghost-btn">恢复默认</button>
+            </div>
+          </div>
+          <div class="panel settings-panel">
+            <h3>心情与鼓励</h3>
+            <h4>心情话语</h4>
+            <div class="mood-msg-list" id="moodMsgList"></div>
+            <h4>打卡鼓励语</h4>
+            <div class="dynamic-list" id="encourageList"></div>
+            <div class="settings-actions">
+              <button id="encourageAdd" class="ghost-btn">添加一条</button>
+              <button id="encourageReset" class="ghost-btn">恢复默认</button>
+            </div>
+          </div>
+          <div class="panel settings-panel">
+            <h3>猫咪与天气</h3>
+            <label class="check-label"><input type="checkbox" id="setCatPopups">启用小猫弹窗</label>
+            <label class="check-label"><input type="checkbox" id="setSilentCheckin">打卡静默弹窗（不弹猫）</label>
+            <label>猫图轮换间隔（分钟）<input type="number" id="setCatInterval" min="1" max="120"></label>
+            <label>天气城市（定位失败时使用）<input type="text" id="setWeatherCity"></label>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal cat-dialog" id="catDialog">
+    <div class="modal-card cat-dialog-card" id="catDialogCard">
+      <img id="catDialogImg" alt="">
+      <p id="catDialogMsg"></p>
+      <button id="catDialogClose" class="primary-btn">知道了</button>
+    </div>
+  </div>
+
+  <div class="modal" id="courseModal">
+    <div class="modal-card">
+      <h3 id="courseModalTitle">添加课程</h3>
+      <form id="courseForm">
+        <label>课程名称<input id="courseTitle" required></label>
+        <div class="form-row">
+          <label>星期<select id="courseDay"></select></label>
+          <label>开始时间<input type="time" id="courseStart"></label>
+        </div>
+        <div class="form-row">
+          <label>结束时间<input type="time" id="courseEnd"></label>
+          <label>颜色<select id="courseColor"></select></label>
+        </div>
+        <div class="form-row">
+          <label>开始周<input type="number" id="courseWeekStart" min="1" max="18"></label>
+          <label>结束周<input type="number" id="courseWeekEnd" min="1" max="18"></label>
+        </div>
+        <div class="form-row">
+          <label>周期<select id="courseWeekPattern">
+            <option value="every">每周</option>
+            <option value="odd">单周</option>
+            <option value="even">双周</option>
+          </select></label>
+          <label>教室<input id="courseLocation"></label>
+        </div>
+        <label>老师<input id="courseTeacher"></label>
+        <label class="done-row"><input type="checkbox" id="courseDone">已上完本课</label>
+        <div class="modal-actions">
+          <button type="button" id="courseDelete" class="danger-btn hidden">删除</button>
+          <span class="spacer"></span>
+          <button type="button" id="courseCancel" class="ghost-btn">取消</button>
+          <button type="submit" class="primary-btn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="hwModal">
+    <div class="modal-card">
+      <h3>编辑作业</h3>
+      <form id="hwEditForm">
+        <label>科目<select id="hwEditCategory"></select></label>
+        <label>作业内容<input id="hwEditTitle" required></label>
+        <div class="form-row">
+          <label>开始日期<input type="date" id="hwEditStart"></label>
+          <label>截止日期<input type="date" id="hwEditDue"></label>
+        </div>
+        <label>截止时间<input type="time" id="hwEditDueTime"></label>
+        <label>备注<textarea id="hwEditNote"></textarea></label>
+        <label>照片<input type="file" id="hwEditFile" accept="image/*" multiple></label>
+        <div class="hw-photos" id="hwEditPhotos"></div>
+        <div class="modal-actions">
+          <span class="spacer"></span>
+          <button type="button" id="hwEditCancel" class="ghost-btn">取消</button>
+          <button type="submit" class="primary-btn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal confirm-modal" id="hwConfirmModal">
+    <div class="modal-card confirm-card">
+      <h3>保存编辑？</h3>
+      <p>作业编辑尚未保存，是否保存后切换页面？</p>
+      <div class="modal-actions">
+        <span class="spacer"></span>
+        <button type="button" id="hwDiscardBtn" class="ghost-btn">放弃</button>
+        <button type="button" id="hwSaveBtn" class="primary-btn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="todoModal">
+    <div class="modal-card">
+      <h3>编辑待办</h3>
+      <form id="todoEditForm">
+        <label>内容<input id="todoEditTitle" required></label>
+        <label>优先级<select id="todoEditPriority">
+          <option value="mid">普通</option>
+          <option value="high">重要</option>
+          <option value="low">不急</option>
+        </select></label>
+        <div class="form-row">
+          <label>截止日期<input type="date" id="todoEditDue"></label>
+          <label>截止时间<input type="time" id="todoEditDueTime"></label>
+        </div>
+        <div class="modal-actions">
+          <span class="spacer"></span>
+          <button type="button" id="todoEditCancel" class="ghost-btn">取消</button>
+          <button type="submit" class="primary-btn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal crop-modal" id="cropModal">
+    <div class="modal-card crop-card">
+      <h3>裁剪背景</h3>
+      <div class="crop-stage" id="cropStage">
+        <img id="cropImg" alt="背景裁剪预览">
+        <div class="crop-box" id="cropBox"><span class="crop-handle"></span></div>
+      </div>
+      <div class="modal-actions">
+        <span class="spacer"></span>
+        <button type="button" id="cropCancel" class="ghost-btn">取消</button>
+        <button type="button" id="cropConfirm" class="primary-btn">应用</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal photo-modal" id="photoModal">
+    <div class="modal-card">
+      <img id="photoModalImg" alt="">
+      <div class="modal-actions">
+        <span class="spacer"></span>
+        <button id="photoModalClose" class="ghost-btn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="importFile" hidden accept="application/json">
+  <input type="file" id="avatarFile" hidden accept="image/*">
+  <script src="app.js"></script>
+</body>
+</html>
